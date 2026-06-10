@@ -335,7 +335,7 @@ body, html {
 /* ==========================================================================
    分頁二：遊戲對話頁
    ========================================================================== */
-#page-game {
+#page-game, #page-chapter2-start {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -516,7 +516,7 @@ body, html {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.25), 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-#chat-player-response {
+#chat-player-response, #c2-chat-player-response {
     flex: 1;
     background: transparent;
     border: none;
@@ -528,7 +528,7 @@ body, html {
     height: 38px;
 }
 
-#chat-player-response::placeholder {
+#chat-player-response::placeholder, #c2-chat-player-response::placeholder {
     color: rgba(255, 255, 255, 0.35);
 }
 
@@ -683,6 +683,27 @@ body, html {
     letter-spacing: 0.5px;
 }
 
+/* 余鋒烈對話氣泡：靠左對齊，深色底，紫細邊 */
+.leader-bubble {
+    align-self: flex-start;
+    background: rgba(22, 24, 38, 0.85);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 20px 20px 20px 4px;
+}
+
+.leader-bubble strong {
+    display: inline-block;
+    color: var(--color-primary);
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid var(--color-primary);
+    font-size: 0.9rem;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
 /* 玩家對話氣泡：置中寬框，純紫色，無名字 */
 .player-bubble {
     align-self: center;
@@ -829,6 +850,11 @@ body, html {
 
 .name-box.role-gm {
     background: var(--grad-gm);
+    border-left: 4px solid #fff;
+}
+
+.name-box.role-leader {
+    background: var(--grad-button);
     border-left: 4px solid #fff;
 }
 
@@ -1241,4 +1267,119 @@ body, html {
 /* 雷達/載入圈旋轉 */
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   分頁五：第一章過渡頁
+   ========================================================================== */
+#page-transition {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.transition-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/背景圖.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.transition-bg-dim {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95); /* 極深近乎全黑的遮罩 */
+    z-index: 2;
+}
+
+.transition-wrapper {
+    position: relative;
+    z-index: 4;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    animation: slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.transition-container {
+    padding: 40px;
+    border-radius: 16px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.transition-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--color-accent);
+    margin-bottom: 25px;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+.transition-body {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-light);
+    margin-bottom: 30px;
+}
+
+.transition-body p {
+    margin-bottom: 18px;
+    text-align: justify;
+    opacity: 0;
+    animation: fadeInText 1s forwards;
+}
+
+.transition-body p:nth-child(1) { animation-delay: 0.2s; }
+.transition-body p:nth-child(2) { animation-delay: 0.8s; }
+.transition-body p:nth-child(3) { animation-delay: 1.4s; }
+.transition-body p:nth-child(4) { animation-delay: 2.0s; }
+.transition-body p:nth-child(5) { animation-delay: 2.6s; }
+.transition-body p:nth-child(6) { animation-delay: 3.2s; }
+.transition-body p:nth-child(7) { animation-delay: 3.8s; }
+
+@keyframes fadeInText {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.transition-quote {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-hr);
+    background: rgba(255, 59, 108, 0.05);
+    border: 1px solid rgba(255, 59, 108, 0.15);
+    padding: 15px 24px;
+    border-radius: 8px;
+    margin: 25px 0;
+    line-height: 1.6;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.transition-click-prompt {
+    display: flex;
+    justify-content: center;
+    font-size: 0.95rem;
+    color: var(--color-gm);
+    font-weight: 600;
+    opacity: 0;
+    animation: fadeInText 1s forwards;
+    animation-delay: 4.4s;
 }

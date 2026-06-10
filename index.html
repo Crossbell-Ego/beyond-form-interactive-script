@@ -11,7 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 
 <body>
@@ -173,6 +173,122 @@
             </div>
         </div>
 
+        <!-- ==================== 分頁五：第一章過渡頁 ==================== -->
+        <div id="page-transition" class="page">
+            <div class="transition-background"></div>
+            <div class="transition-bg-dim"></div>
+            <div class="transition-wrapper">
+                <div class="transition-container glass">
+                    <h2 class="transition-title">【第一章 結束】</h2>
+                    <div class="transition-body">
+                        <p>你成功渡過了被 HR 淘汰的危機，並拿到了部門改造的許可。</p>
+                        <p>然而，就在你深夜準備離開辦公室、關閉公用電腦時，螢幕上突然跳出了一封加密的內部郵件……</p>
+                        <p>那是一份被稱為<strong>「吞日計畫」</strong>的絕密檔案。</p>
+                        <p>檔案裡記錄的不是公司的業績，而是業務部全體員工的「心率、抗壓值與瘋狂指數」。你驚恐地發現，公司並非盲目地讓員工加班；他們是在利用高壓與內鬥，故意將特定員工逼向精神崩潰與墮落。</p>
+                        <p>在檔案的最底部，赫然寫著「總經理蘇恬的簽名」，以及一行冰冷的警語：</p>
+                        <p class="transition-quote">『當命運開始被批量製造，世界將失去選擇的意義。』</p>
+                        <p>你倒吸一口涼氣。原來，這個爆肝地獄的背後，藏著一個操控整個公司員工的計劃。</p>
+                        <p>隨著你的職位越來越高，最後藏在整個公司的祕密會是什麼呢.....。</p>
+                    </div>
+                    <div class="transition-click-prompt">
+                        <span class="pulse-text">🖱️ 點擊滑鼠左鍵 進入第二章</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁六：第二章開場對話頁 ==================== -->
+        <div id="page-chapter2-start" class="page">
+            <!-- 遊戲背景，預設由 CSS 設為 images/背景圖.png -->
+            <div class="game-background"></div>
+            <div class="game-bg-dim"></div>
+
+            <!-- 角色立繪顯示區 (開場置中) -->
+            <div class="character-container">
+                <img id="char-img-c2" src="images/角色三.png" alt="余鋒烈" class="character-sprite">
+            </div>
+
+            <!-- 遊戲主要 UI 介面層 -->
+            <div class="game-ui">
+                <!-- 頂部提示/章節 -->
+                <div class="top-bar">
+                    <div class="chapter-tag">第二幕：吞日黑幕</div>
+                    <div class="game-status">
+                        <span>目前狀態：<strong id="c2-status-text">主管的召集</strong></span>
+                    </div>
+                </div>
+
+                <!-- 底部對話區 -->
+                <div class="dialogue-wrapper glass">
+                    <!-- 角色名稱標籤 -->
+                    <div class="name-box-container">
+                        <div id="c2-name-box" class="name-box role-leader">余鋒烈</div>
+                    </div>
+
+                    <!-- 對話內容區 -->
+                    <div class="dialogue-content">
+                        <p id="c2-dialogue-text">嘿！你就是總經理親點調來的新人吧？聽說你在業務部搞了個大動作，有衝勁！  實話告訴你，我們接下來要推動『跨國智慧管理系統』，只要成功，就能徹底掀翻公司爆肝加班的爛制度！  但現在夏凌正盯著我們的預算，我們第一步必須<strong>在不被他抓到把柄的情況下，拿到海外分公司的測試數據</strong>。挑戰來了，你有膽量跟我一起幹這條大的嗎？你打算用什麼策略幫專案跨出這第一步？說聽聽你的計畫！</p>
+                    </div>
+
+                    <!-- 點擊繼續提示 -->
+                    <div id="c2-click-prompt" class="click-prompt">
+                        <span>點擊任意處繼續 ➔</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁七：第二章對答頁 ==================== -->
+        <div id="page-chapter2-chat" class="page">
+            <div class="game-background"></div>
+            <div class="game-bg-dim"></div>
+
+            <!-- 角色三單獨立繪 -->
+            <div class="characters-split-container">
+                <div class="char-wrapper char-left active-speaker" id="chat-wrapper-c2-leader">
+                    <img src="images/角色三_分頁七.png" alt="余鋒烈" class="char-sprite-split">
+                    <div class="char-name-tag" style="background: var(--grad-button);">余鋒烈 (業務副理)</div>
+                </div>
+            </div>
+
+            <!-- 聊天與輸入 UI -->
+            <div class="chat-ui">
+                <!-- 頂部提示 -->
+                <div class="top-bar">
+                    <div class="chapter-tag">第二幕：吞日黑幕 (研討中)</div>
+                    <div class="game-status">
+                        <span>目前狀態：<strong id="c2-chat-status-text">請輸入你的專案策略</strong></span>
+                    </div>
+                </div>
+
+                <!-- 滾動對話歷史紀錄區 -->
+                <div id="c2-chat-history" class="chat-history-container glass">
+                    <!-- 對話歷程將動態生成於此 -->
+                </div>
+
+                <!-- 底部聊天輸入欄與載入動畫 -->
+                <div class="chat-input-area-wrapper">
+                    <!-- 玩家輸入區 -->
+                    <div id="c2-chat-input-container" class="chat-input-bar">
+                        <input type="text" id="c2-chat-player-response" placeholder="輸入你想對余鋒烈說的話..." autocomplete="off">
+                        <button id="c2-chat-submit-response-btn" class="chat-send-btn" title="送出策略">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- AI 載入動畫 -->
+                    <div id="c2-chat-ai-loading" class="chat-ai-status-bar hidden">
+                        <div class="loader-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <p class="loader-text-small">余鋒烈正在思考你的構想...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ==================== 結局彈出視窗 ==================== -->
         <div id="ending-screen" class="ending-screen hidden">
             <div class="ending-card glass">
@@ -188,7 +304,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=7"></script>
 </body>
 
 </html>

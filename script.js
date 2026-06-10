@@ -14,12 +14,12 @@ const dialogueData = [
         role: "蘇恬",
         image: "images/角色二.png",
         styleClass: "role-gm",
-        text: "夏凌，你那套冰冷的 KPI 數據該適可而止了。如果一個部門只剩下瘋狂加班和內鬥，那公司離倒閉也不遠了。這位新人，我想聽聽你的想法，你打算怎麼解決你目前的處境？"
+        text: "夏凌，你那套冰冷的 KPI 數據該適可而止了。如果一個部門只剩下瘋狂加班 and 內鬥，那公司離倒閉也不遠了。這位新人，我想聽聽你的想法，你打算怎麼解決你目前的處境？"
     }
 ];
 
 // 遊戲狀態與對話歷史變數
-let currentPageState = "start"; // start, story, game, chat, ending
+let currentPageState = "start"; // start, story, game, chat, transition, ending
 let dialogueIndex = 0;
 let isTyping = false;
 let typeInterval = null;
@@ -36,6 +36,9 @@ const pageStart = document.getElementById("page-start");
 const pageStory = document.getElementById("page-story");
 const pageGame = document.getElementById("page-game");
 const pageChat = document.getElementById("page-chat");
+const pageTransition = document.getElementById("page-transition");
+const pageChapter2Start = document.getElementById("page-chapter2-start");
+const pageChapter2Chat = document.getElementById("page-chapter2-chat");
 const endingScreen = document.getElementById("ending-screen");
 
 // 分頁二 (page-game) 立繪 (開場置中)
@@ -45,6 +48,10 @@ const dialogueText = document.getElementById("dialogue-text");
 const clickPrompt = document.getElementById("click-prompt");
 const statusText = document.getElementById("status-text");
 
+// 分頁六 (page-chapter2-start) 立繪與文字
+const charImgC2 = document.getElementById("char-img-c2");
+const c2DialogueText = document.getElementById("c2-dialogue-text");
+
 // 分頁四 (page-chat) 立繪與聊天 UI
 const chatWrapperHr = document.getElementById("chat-wrapper-hr");
 const chatWrapperGm = document.getElementById("chat-wrapper-gm");
@@ -52,12 +59,19 @@ const chatHistory = document.getElementById("chat-history");
 const chatStatusText = document.getElementById("chat-status-text");
 
 // 分頁四的底部發言與輸入區
-
 const chatInputContainer = document.getElementById("chat-input-container");
 const chatPlayerResponse = document.getElementById("chat-player-response");
 const chatSubmitResponseBtn = document.getElementById("chat-submit-response-btn");
 const quickOptButtons = document.querySelectorAll(".quick-opt-btn");
 const chatAiLoading = document.getElementById("chat-ai-loading");
+
+// 分頁七 (page-chapter2-chat) 立繪與聊天 UI
+const c2ChatHistory = document.getElementById("c2-chat-history");
+const c2ChatStatusText = document.getElementById("c2-chat-status-text");
+const c2ChatInputContainer = document.getElementById("c2-chat-input-container");
+const c2ChatPlayerResponse = document.getElementById("c2-chat-player-response");
+const c2ChatSubmitResponseBtn = document.getElementById("c2-chat-submit-response-btn");
+const c2ChatAiLoading = document.getElementById("c2-chat-ai-loading");
 
 // 結局畫面
 const endingTitle = document.getElementById("ending-title");
@@ -230,14 +244,14 @@ function setActiveSpeaker(role) {
     }
 }
 
-// 新增：AI 對答串接狀態機變數
+// AI 對答串接狀態機變數
 let aiFlowStep = 5; // 5 代表閒置/玩家回合
 let currentActiveBubble = null;
 let currentActiveBubbleRole = "";
 let currentActiveBubbleText = "";
 let aiTimeoutId = null;
 
-// 新增：動態生成打字中氣泡
+// 動態生成打字中氣泡
 function appendTypingBubble(role) {
     const bubble = document.createElement("div");
     bubble.classList.add("chat-bubble", "typing-bubble");
@@ -245,17 +259,21 @@ function appendTypingBubble(role) {
     if (role === "夏凌") {
         bubble.classList.add("hr-bubble");
         bubble.innerHTML = `<strong>夏凌</strong><br><span class="typing-indicator"><span>.</span><span>.</span><span>.</span></span>`;
-    } else {
+    } else if (role === "蘇恬") {
         bubble.classList.add("gm-bubble");
         bubble.innerHTML = `<strong>蘇恬</strong><br><span class="typing-indicator"><span>.</span><span>.</span><span>.</span></span>`;
+    } else if (role === "余鋒烈") {
+        bubble.classList.add("leader-bubble");
+        bubble.innerHTML = `<strong>余鋒烈</strong><br><span class="typing-indicator"><span>.</span><span>.</span><span>.</span></span>`;
     }
     
-    chatHistory.appendChild(bubble);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    const targetHistory = currentPageState === "chapter2_chat" ? c2ChatHistory : chatHistory;
+    targetHistory.appendChild(bubble);
+    targetHistory.scrollTop = targetHistory.scrollHeight;
     return bubble;
 }
 
-// 新增：在氣泡中執行打字機特效
+// 在氣泡中執行打字機特效
 function typewriteBubble(bubble, role, text, onComplete) {
     clearInterval(typeInterval);
     isTyping = true;
@@ -267,12 +285,14 @@ function typewriteBubble(bubble, role, text, onComplete) {
     const textSpan = document.createElement("span");
     bubble.appendChild(textSpan);
     
+    const targetHistory = currentPageState === "chapter2_chat" ? c2ChatHistory : chatHistory;
+    
     let index = 0;
     typeInterval = setInterval(() => {
         if (index < text.length) {
             textSpan.textContent += text[index];
             index++;
-            chatHistory.scrollTop = chatHistory.scrollHeight;
+            targetHistory.scrollTop = targetHistory.scrollHeight;
         } else {
             isTyping = false;
             clearInterval(typeInterval);
@@ -281,14 +301,20 @@ function typewriteBubble(bubble, role, text, onComplete) {
     }, 30);
 }
 
-// 新增：加速/跳過氣泡打字
+// 加速/跳過氣泡打字
 function skipBubbleTypewriter() {
     clearInterval(typeInterval);
     isTyping = false;
     if (currentActiveBubble) {
         currentActiveBubble.classList.remove("typing-bubble");
         currentActiveBubble.innerHTML = `<strong>${currentActiveBubbleRole}</strong><br><span>${currentActiveBubbleText}</span>`;
-        chatHistory.scrollTop = chatHistory.scrollHeight;
+        const targetHistory = currentPageState === "chapter2_chat" ? c2ChatHistory : chatHistory;
+        targetHistory.scrollTop = targetHistory.scrollHeight;
+    }
+    
+    if (currentPageState === "chapter2_chat") {
+        chatHistoryData.push({ role: "余鋒烈", text: currentActiveBubbleText });
+        return;
     }
     
     // 進入下一步
@@ -303,19 +329,19 @@ function skipBubbleTypewriter() {
     }
 }
 
-// 新增：跳過 AI 對答中間的等待/延遲
+// 跳過 AI 對答中間的等待/延遲
 function skipAiDelay() {
     clearTimeout(aiTimeoutId);
     runAiFlowStep();
 }
 
-// 新增：啟動 AI 連鎖對話流
+// 啟動 AI 連鎖對話流
 function startAiResponseFlow() {
     aiFlowStep = 0;
     runAiFlowStep();
 }
 
-// 新增：AI 對答狀態機核心邏輯
+// AI 對答狀態機核心邏輯
 function runAiFlowStep() {
     clearTimeout(aiTimeoutId);
     
@@ -356,18 +382,22 @@ function runAiFlowStep() {
         });
     } 
     else if (aiFlowStep === 4) {
-        // AI 回應完畢，決定是否結局或重啟玩家輸入
+        // AI 回應完畢，決定是否進入第一章結束過渡頁或重啟玩家輸入
         setActiveSpeaker("none");
-        aiFlowStep = 5;
-        if (currentDualReply.trigger_ending) {
+        if (currentDualReply.trigger_transition) {
+            chatStatusText.textContent = "點擊任意處繼續 ➔";
+            aiFlowStep = 6;
+        } else if (currentDualReply.trigger_ending) {
             showEndingCard(currentDualReply.ending_data);
+            aiFlowStep = 5;
         } else {
             showInputArea();
+            aiFlowStep = 5;
         }
     }
 }
 
-// 動態生成氣泡並加入滾動歷史紀錄區 (分頁四)
+// 動態生成氣泡並加入滾動歷史紀錄區 (分頁四/分頁七)
 function appendChatBubble(role, text) {
     const bubble = document.createElement("div");
     bubble.classList.add("chat-bubble");
@@ -378,14 +408,17 @@ function appendChatBubble(role, text) {
     } else if (role === "蘇恬") {
         bubble.classList.add("gm-bubble");
         bubble.innerHTML = `<strong>蘇恬</strong><br><span>${text}</span>`;
+    } else if (role === "余鋒烈") {
+        bubble.classList.add("leader-bubble");
+        bubble.innerHTML = `<strong>余鋒烈</strong><br><span>${text}</span>`;
     } else {
         bubble.classList.add("player-bubble");
         bubble.innerHTML = `<span>${text}</span>`;
     }
     
-    chatHistory.appendChild(bubble);
-    // 平滑滾動到最下方
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    const targetHistory = currentPageState === "chapter2_chat" ? c2ChatHistory : chatHistory;
+    targetHistory.appendChild(bubble);
+    targetHistory.scrollTop = targetHistory.scrollHeight;
 }
 
 
@@ -401,7 +434,8 @@ document.body.addEventListener("click", (e) => {
         e.target.closest("input") || 
         e.target.closest(".modal-content") || 
         e.target.closest(".ending-card") ||
-        e.target.closest("#chat-input-container")) {
+        e.target.closest("#chat-input-container") ||
+        e.target.closest("#c2-chat-input-container")) {
         return;
     }
 
@@ -429,6 +463,25 @@ function handleGlobalClick() {
         } 
     } else if (currentPageState === "chat") {
         // 分頁四 LINE/Telegram 對話流
+        if (aiFlowStep !== 5) {
+            if (isTyping) {
+                skipBubbleTypewriter();
+            } else if (aiFlowStep === 6) {
+                aiFlowStep = 5;
+                switchToTransitionPage();
+            } else {
+                skipAiDelay();
+            }
+        }
+    } else if (currentPageState === "transition") {
+        switchToChapter2();
+    } else if (currentPageState === "chapter2_start") {
+        if (isTyping) {
+            skipTypewriter();
+            return;
+        }
+        switchToChapter2Chat();
+    } else if (currentPageState === "chapter2_chat") {
         if (aiFlowStep !== 5) {
             if (isTyping) {
                 skipBubbleTypewriter();
@@ -511,6 +564,38 @@ function switchToChatPage() {
     }, 800);
 }
 
+// 切換至第一章過渡頁 (分頁五)
+function switchToTransitionPage() {
+    currentPageState = "transition";
+    pageChat.classList.remove("active");
+    pageTransition.classList.add("active");
+    
+    // 重置並重新執行段落依序浮現的動畫效果
+    const paragraphs = pageTransition.querySelectorAll(".transition-body p, .transition-click-prompt");
+    paragraphs.forEach(p => {
+        p.style.animation = "none";
+        p.offsetHeight; // 觸發 reflow
+        p.style.animation = null;
+    });
+}
+
+// 切換至第二章開場對話頁 (分頁六)
+function switchToChapter2() {
+    currentPageState = "chapter2_start";
+    pageTransition.classList.remove("active");
+    pageChapter2Start.classList.add("active");
+    
+    // 初始化立繪與打字機特效
+    charImgC2.classList.remove("show");
+    c2DialogueText.textContent = "";
+    
+    setTimeout(() => {
+        charImgC2.classList.add("show");
+        const chapter2IntroText = "嘿！你就是總經理親點調來的新人吧？聽說你在業務部搞了個大動作，有衝勁！  實話告訴你，我們接下來要推動『跨國智慧管理系統』，只要成功，就能徹底掀翻公司爆肝加班的爛制度！  但現在夏凌正盯著我們的預算，我們第一步必須在不被他抓到把柄的情況下，拿到海外分公司的測試數據。挑戰來了，你有膽量跟我一起幹這條大的嗎？你打算用什麼策略幫專案跨出這第一步？說聽聽你的計畫！";
+        startTypewriter(chapter2IntroText);
+    }, 150);
+}
+
 // 顯示分頁四的玩家輸入區
 function showInputArea() {
     currentSpeakerState = "player";
@@ -535,6 +620,8 @@ function startTypewriter(text) {
     
     if (currentPageState === "game") {
         dialogueText.textContent = "";
+    } else if (currentPageState === "chapter2_start") {
+        c2DialogueText.textContent = "";
     }
     
     let index = 0;
@@ -542,49 +629,45 @@ function startTypewriter(text) {
         if (index < text.length) {
             if (currentPageState === "game") {
                 dialogueText.textContent += text[index];
+            } else if (currentPageState === "chapter2_start") {
+                c2DialogueText.textContent += text[index];
             }
             index++;
         } else {
-            completeTypewriter();
+            clearInterval(typeInterval);
+            isTyping = false;
         }
-    }, 35);
+    }, 50);
 }
 
 function skipTypewriter() {
     clearInterval(typeInterval);
-    if (currentPageState === "game") {
-        dialogueText.textContent = currentTextToShow;
-    }
-    completeTypewriter();
-}
-
-function completeTypewriter() {
     isTyping = false;
     if (currentPageState === "game") {
-        clickPrompt.classList.remove("hidden");
+        dialogueText.textContent = currentTextToShow;
+    } else if (currentPageState === "chapter2_start") {
+        c2DialogueText.textContent = currentTextToShow;
     }
 }
 
-
 // ==========================================================================
-// 5. 決策提交與 AI Agent 多對話循環
+// 5. 聊天氣泡與玩家互動
 // ==========================================================================
 
-// 手動送出
-chatSubmitResponseBtn.addEventListener("click", () => {
-    const text = chatPlayerResponse.value.trim();
-    if (!text) {
-        alert("請輸入您的回答！");
-        return;
-    }
-    submitPlayerDecision(text);
-});
-
-// 支援 Enter 鍵送出
+// 監聽輸入框 Enter 鍵
 chatPlayerResponse.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         chatSubmitResponseBtn.click();
+    }
+});
+
+// 監聽發送按鈕點擊
+chatSubmitResponseBtn.addEventListener("click", () => {
+    const text = chatPlayerResponse.value.trim();
+    if (text) {
+        submitPlayerDecision(text);
+        chatPlayerResponse.value = "";
     }
 });
 
@@ -617,6 +700,180 @@ function submitPlayerDecision(inputText) {
     }, 1200);
 }
 
+// 切換至第二章對答頁 (分頁七)
+function switchToChapter2Chat() {
+    currentPageState = "chapter2_chat";
+    pageChapter2Start.classList.remove("active");
+    pageChapter2Chat.classList.add("active");
+    
+    // 初始化對話歷史
+    c2ChatHistory.innerHTML = "";
+    chatHistoryData = []; 
+    roundCount = 1;
+    
+    const introText = "嘿！你就是總經理親點調來的新人吧？聽說你在業務部搞了個大動作，有衝勁！  實話告訴你，我們接下來要推動『跨國智慧管理系統』，只要成功，就能徹底掀翻公司爆肝加班的爛制度！  但現在夏凌正盯著我們的預算，我們第一步必須在不被他抓到把柄的情況下，拿到海外分公司的測試數據。挑戰來了，你有膽量跟我一起幹這條大的嗎？你打算用什麼策略幫專案跨出這第一步？說聽聽你的計畫！";
+    appendChatBubble("余鋒烈", introText);
+    chatHistoryData.push({ role: "余鋒烈", text: introText });
+    
+    showC2InputArea();
+}
+
+// 顯示分頁七的玩家輸入區
+function showC2InputArea() {
+    currentSpeakerState = "player";
+    c2ChatInputContainer.classList.remove("hidden");
+    c2ChatStatusText.textContent = "請輸入你的回應對策";
+    c2ChatPlayerResponse.value = "";
+    c2ChatPlayerResponse.focus();
+}
+
+// 監聽分頁七輸入框 Enter 鍵
+c2ChatPlayerResponse.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        c2ChatSubmitResponseBtn.click();
+    }
+});
+
+// 監聽分頁七發送按鈕點擊
+c2ChatSubmitResponseBtn.addEventListener("click", () => {
+    const text = c2ChatPlayerResponse.value.trim();
+    if (text) {
+        submitC2PlayerDecision(text);
+        c2ChatPlayerResponse.value = "";
+    }
+});
+
+// 處理第二章玩家提交
+function submitC2PlayerDecision(inputText) {
+    c2ChatInputContainer.classList.add("hidden");
+    c2ChatAiLoading.classList.remove("hidden");
+    c2ChatStatusText.textContent = "余鋒烈正在思考你的職場策略...";
+    
+    appendChatBubble("你", inputText); // 使用玩家發言
+    chatHistoryData.push({ role: "你", text: inputText });
+    
+    roundCount++;
+    
+    setTimeout(async () => {
+        let responseObj;
+        if (geminiApiKey) {
+            responseObj = await fetchLeaderResponse(inputText);
+        } else {
+            responseObj = getLocalSimulatedLeaderResponse(inputText);
+        }
+        
+        c2ChatAiLoading.classList.add("hidden");
+        
+        c2ChatStatusText.textContent = `第 ${roundCount} 輪：余鋒烈思考中...`;
+        const bubble = appendTypingBubble("余鋒烈");
+        
+        setTimeout(() => {
+            currentActiveBubble = bubble;
+            currentActiveBubbleRole = "余鋒烈";
+            currentActiveBubbleText = responseObj.reply;
+            
+            typewriteBubble(bubble, "余鋒烈", responseObj.reply, () => {
+                chatHistoryData.push({ role: "余鋒烈", text: responseObj.reply });
+                
+                if (responseObj.trigger_ending) {
+                    showEndingCard(responseObj.ending_data);
+                } else if (responseObj.trigger_transition) {
+                    alert("你提出的方案深得余鋒烈認可！專案跨出關鍵一步！第二章【吞日黑幕】演示結束，感謝遊玩！");
+                    restartBtn.click();
+                } else {
+                    showC2InputArea();
+                }
+            });
+        }, 800);
+    }, 1200);
+}
+
+// 呼叫第二章主管 Gemini API
+async function fetchLeaderResponse(inputText) {
+    const historyText = chatHistoryData.map(item => `${item.role}: ${item.text}`).join("\n");
+    
+    const prompt = `
+你現在是線上職場劇本殺《化形之後》的第二章對答 Agent 系統。請扮演角色：
+「余鋒烈」（業務部北區副理。熱血樂觀、說話直接、不服輸、理想主義導向。討厭保守與紙上談兵，極度欣賞敢冒險、有突破性構想的新人）。
+
+目前為止，第二章的對話歷史紀錄如下：
+${historyText}
+
+現在，玩家（新人）說了這番話：
+「${inputText}」
+
+請根據余鋒烈的背景性格，生成他對玩家的回應文字。
+【核心核心推進判定規則】：
+1. 仔細評估玩家說的話，玩家是否提出了一個「具有突破性、有膽量或創意的具體執行策略」（例如：利用自動化腳本爬取數據、暗中突破限制、設計繞過夏凌的秘密方法等）。
+2. 如果玩家的方案「太過保守、直接放棄、或者只是敷衍的空話」，請讓余鋒烈繼續進行熱血引導或駁斥，並將 JSON 中的 "trigger_transition" 設為 false。
+3. 如果玩家「確實提出了有創意且大膽的策略」，代表玩家得到了余鋒烈的認可！此時余鋒烈的回應文字（reply）必須表達極高的讚賞與熱血合作態度，且務必將 JSON 中的 "trigger_transition" 設為 true。
+
+請務必只返回一個 JSON 對象，不要包含 Markdown 格式的 \`\`\`json 標記。格式必須嚴格符合以下結構：
+{
+  "reply": "余鋒烈對玩家回應的文字...",
+  "trigger_transition": 填入 true 或 false,
+  "trigger_ending": false
+}
+`;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        parts: [
+                            { text: prompt }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("API request failed");
+        }
+
+        const data = await response.json();
+        const responseText = data.candidates[0].content.parts[0].text;
+        return JSON.parse(responseText.trim());
+    } catch (error) {
+        console.error("呼叫 Gemini API 發生錯誤，轉為本地智慧模擬:", error);
+        const fallback = getLocalSimulatedLeaderResponse(inputText);
+        fallback.reply = "⚠️ [API連線異常，已切換至本地模擬] " + fallback.reply;
+        return fallback;
+    }
+}
+
+// 本地智慧模擬降級方案 (第二章 余鋒烈單獨版)
+function getLocalSimulatedLeaderResponse(text) {
+    const textLower = text.toLowerCase();
+    const isCreative = /(自動|爬蟲|暗中|繞過|調查|科技|數據|海外|偷爬|腳本|程式|api|直接|秘密)/.test(textLower);
+    
+    let reply = "這樣可能不太行吧？我想看到更具突破性、更帶有膽識的計畫！如果只是做些保守的紙上談兵，夏凌那邊隨便一查我們就完蛋了。有沒有更狂野一點的點子？";
+    let trigger_transition = false;
+    
+    if (isCreative) {
+        reply = "好！有膽量！用這個方法確實可以在夏凌毫無察覺的情況下把數據弄到手！業務部就需要你這種敢於突破常規的悍將。那我們今天晚上就動手，你來寫抓取工具，我負責在前方打掩護，把這條大的幹下來！";
+        trigger_transition = true;
+    } else if (/(放棄|不可能|沒辦法|投降|太難|保守|照規矩|害怕|檢舉)/.test(textLower)) {
+        reply = "什麼？還沒開始就說不可能？我們要是遇到困難就退縮，那跟外面那些只會唯唯諾諾的爆肝行屍走肉有什麼兩樣？拿出新人的氣勢來，再想想，一定有破局的方法！";
+    }
+    
+    return {
+        reply: reply,
+        trigger_transition: trigger_transition,
+        trigger_ending: false
+    };
+}
+
 
 // ==========================================================================
 // 6. Gemini API 多 Agent 聯動 Prompt 呼叫
@@ -626,9 +883,9 @@ async function fetchDualAgentResponse(inputText) {
     const historyText = chatHistoryData.map(item => `${item.role}: ${item.text}`).join("\n");
     
     const prompt = `
-你現在是線上職場劇本殺《化形之外》的核心對答 Agent 系統。請同時扮演兩位角色：
-1. 「夏凌」（KPI稽核，總公司派來整頓業務部的實習主管。講求數據與極致效率，認為加班和內鬥是提升產值的唯一手段，極度冷酷，對新人百般刁難與質疑，說話刻刻薄，常使用高大上的商業黑話與數據威脅）。
-2. 「蘇恬」（空降總經理。優雅有威嚴，想打破病態的爆肝加班文化，欣賞敢於改革的新人，會在暗中支持新人並有力地反駁夏凌的刻薄言論，引導新人說出具體可行對策）。
+你現在是線上職場劇本殺《化形之後》的核心對答 Agent 系統。請同時扮演兩位角色：
+1. 「夏凌」（KPI稽核主管。講求數據與極致效率，認為加班是提升產值的唯一手段，冷酷且說話刻薄[cite: 1]）。
+2. 「蘇恬」（空降總經理。優雅有威嚴，想打破病態的爆肝加班文化，欣賞敢於改革的新人[cite: 1]）。
 
 目前為止，辦公室裡的三方對話歷史紀錄如下：
 ${historyText}
@@ -637,20 +894,20 @@ ${historyText}
 「${inputText}」
 
 請根據兩位角色的背景性格與以上對話歷程，生成他們兩人的下一輪對答交鋒內容：
-- 夏凌（角色一）會先對玩家的回覆進行挑剔、施壓或嘲諷，指責其不切實際、拉低績效或缺乏奉獻度，字數約 60-100 字。
-- 蘇恬（角色二）隨後會針對夏凌的刁難言論進行犀利的反駁，並表示對新人的理解或給予暗示，引導新人提出更具體的做法，字數約 60-100 字。
-- 結局判定：如果這是第 3 輪對話（當前 roundCount 變數大於等於 3），或者玩家提出了非常精彩的數位化/AI 改革方案，或者提出了非常過分的擺爛言論，請在此輪判定結局，並將 "trigger_ending" 設為 true。如果還在互動對話階段，請設為 false。
+- 夏凌（角色一）會先對玩家的回覆進行挑剔、施壓或嘲諷，指責其拉低績效或缺乏奉獻度[cite: 1]。
+
+【核心核心推進判定規則】：
+1. 仔細評估玩家說的話，玩家是否真的提出了一個「具體的、具建設性的職場改善建議或改造計畫」（例如：引進自動化工具、優化流程、合理分配工時、拒絕無效加班等）[cite: 1, 2]。
+2. 如果玩家「只是在抱怨、摸魚擺爛、或講空話」，請讓蘇恬繼續進行正常的引導詢問[cite: 1, 2]，並將 JSON 中的 "trigger_transition" 設為 false[cite: 2]。
+3. 如果玩家「確實提出了合理的改善建議」，代表玩家得到了蘇恬的認可[cite: 2]！此時蘇恬（角色二）的回應文字（char2_reply）必須「逐字一字不差」地強制輸出以下這段指定台詞：
+「很好，既然你提出了這個部門改造計畫，我就給你應有的權限。從明天起，你正式調任至萬鈞股份的『核心營運專案組』。讓我看看你能把這個爆肝地獄改變到什麼程度。」
+並且，此時請務必將 JSON 中的 "trigger_transition" 設為 true[cite: 2]。
 
 請務必只返回一個 JSON 對象，不要包含 Markdown 格式的 \`\`\`json 標記。格式必須嚴格符合以下結構：
 {
   "char1_reply": "夏凌對玩家與當前局勢的刁難回應文字...",
-  "char2_reply": "蘇恬駁斥夏凌並對玩家進行引導的回應文字...",
-  "trigger_ending": false,
-  "ending_data": {
-    "ending": "結局名稱 (例如：✨ 智慧改革先鋒、⚖️ 勞基法捍衛者、🐠 快樂摸魚犧牲者、💀 爆肝地獄犧牲者，或你自創的生動稱號)",
-    "illustration": "一個適合該結局的表情符號 Emoji (例如：🚀, 🛡️, 💸, 🕯️)",
-    "description": "該結局的詳細說明，描述新人的決策最後如何改變了部門，以及他最後的職場命運。字數約 120-150 字。"
-  }
+  "char2_reply": "蘇恬駁斥夏凌並對玩家進行引導或認可的回應文字...",
+  "trigger_transition": 填入 true 或 false
 }
 `;
 
@@ -693,59 +950,31 @@ ${historyText}
 // 本地智慧模擬降級方案
 function getLocalSimulatedDualResponse(text) {
     const textLower = text.toLowerCase();
-    const isEndingRound = roundCount >= 3; // 第 3 輪強制觸發結局
     
-    if (/(ai|自動|工具|效率|優化|程式|流程|python|試算表|寫扣|科技|加速)/.test(textLower)) {
-        return {
-            char1_reply: "引進 AI 工具？這聽起來只是一頁 PPT 的噱頭。你能向 HR 稽核組保證這能帶來多少 ROI 增長？如果導入後績效反而下跌，這項責任誰來擔起？",
-            char2_reply: "夏凌，如果連嘗試的勇氣都沒有，那公司才真正沒有未來。新人，我會撥一筆專案預算讓你測試這個自動化工作流，用數據向大家證明你的價值！",
-            trigger_ending: isEndingRound,
-            ending_data: {
-                ending: "✨ 智慧改革先鋒",
-                illustration: "🚀",
-                description: "在蘇恬總經理的全力支持下，你所導入的 AI 自動化工具在部門內取得巨大成功，工時大幅減少，產值反增 30%。夏凌在數據面前不得不服，你被拔擢為專案組長，成為萬鈞公司的數位先鋒！"
-            }
-        };
-    }
+    // 判定玩家是否提出了改善、自動化、工具、流程優化等關鍵建議[cite: 2]
+    const hasImprovementPlan = /(ai|自動|工具|效率|優化|程式|流程|python|試算表|寫扣|科技|加速|合理|分配|計畫|建議|改造)/.test(textLower);
     
-    if (/(檢舉|勞基|申訴|打卡|工會|證據|截圖|法律|告他|檢舉信|投訴)/.test(textLower)) {
-        return {
-            char1_reply: "收集證據？檢舉？你這是公然威脅公司！一個不願意與部門共進退、整天只想著法律漏洞的人，根本毫無團隊凝聚力可言！",
-            char2_reply: "夏凌，公司的合規營運才是第一要務，威脅法律底線是不理智的。新人，如果部門確實有造假工時、未發加班費的實情，總經理室絕不姑息，你整理的資料可以直接呈報給我。",
-            trigger_ending: isEndingRound,
-            ending_data: {
-                ending: "⚖️ 勞基法捍衛者",
-                illustration: "🛡️",
-                description: "你整理的證據引發了勞動局的強力整頓，在蘇恬的鐵腕整肅下，超時加班的惡習徹底崩瓦解。雖然你成了 HR 的眼中釘，但部門同事們一致封你為拯救他們的職場救世主！"
-            }
-        };
-    }
+    let char1 = "你說得這麼冠冕堂皇，但你的工時數據依然是全組最低。HR 需要的是即戰力與實際的產出，而不是沒有著陸點的空泛口號！";
+    let char2 = "新人，夏凌的數據要求雖然嚴厲，但確實是客觀事實。我想看到你更具強而有力的執行策略，否則我也難在董事會前為你說情。你有沒有具體的人體改革行動方案？";
     
-    if (/(摸魚|下班|走人|打混|擺爛|隨便|睡覺|泡茶|下班了)/.test(textLower)) {
-        return {
-            char1_reply: "準時下班？摸魚？你這是在浪費公司的資源！實習期的評核指標是『無私奉獻度』，你這樣的擺爛態度，我現在就能當場把你開除！",
-            char2_reply: "夏凌，新人如果能高效率地在上班時間完成工作，準時下班何罪之有？不過新人，如果你真的整天只想著混日子，我也無法為你說太多好話。希望你展現真正的實力。",
-            trigger_ending: isEndingRound,
-            ending_data: {
-                ending: "🐠 快樂摸魚流放者",
-                illustration: "💸",
-                description: "你堅定執行擺爛與準時下班的對策，最終被夏凌以實習評分不合格為由強行辭退。幸好你順利拿到了資遣費，並在隔壁公司找到了更尊重 WLB 的工作，重獲自由！"
-            }
-        };
+    if (hasImprovementPlan) {
+        char1 = "引進新工具和優化流程？這聽起來只是一頁 PPT 的噱頭。你能向 HR 稽核組保證這能帶來多少 ROI 增長？如果導入後績效反而下跌，這項責任誰來擔起？";
+        // 得到認可，強制使用指定台詞[cite: 2]
+        char2 = "很好，既然你提出了這個部門改造計畫，我就給你應有的權限。從明天起，你正式調任至萬鈞股份的『核心營運專案組』。讓我看看你能把這個爆肝地獄改變到什麼程度。";
+    } else if (/(檢舉|勞基|申訴|打卡|工會|證據|截圖|法律|告他|檢舉信|投訴)/.test(textLower)) {
+        char1 = "收集證據？檢舉？你這是公然威脅公司！一個不願意與部門共進退、整天只想著法律漏洞的人，根本毫無團隊凝聚力可言！";
+        char2 = "夏凌，公司的合規營運才是第一要務。新人，如果部門確實有造假工時、未發加班費的實情，總經理室絕不姑息，你整理的資料可以直接呈報給我。";
+    } else if (/(摸魚|下班|走人|打混|擺擺|隨便|睡覺|泡茶|下班了)/.test(textLower)) {
+        char1 = "準時下班？摸魚？你這是在浪費公司的資源！實習期的評核指標是『無私奉獻度』，你這樣的擺爛態度，我現在就能當場把你開除！";
+        char2 = "夏凌，新人如果能高效率地在上班時間完成工作，準時下班何罪之有？不過新人，如果你真的整天只想著混日子，希望你展現真正的實力。";
     }
     
     return {
-        char1_reply: "你說得這麼冠冕堂皇，但你的工時數據依然是全組最低。HR 需要的是即戰力與實際的產出，而不是沒有著陸點的空泛口號！",
-        char2_reply: "新人，夏凌的數據要求雖然嚴厲，但確實是客觀事實。我想看到你更具體的執行策略，否則我也很難在董事會前為你說情。你有沒有具體的改革行動方案？",
-        trigger_ending: isEndingRound,
-        ending_data: {
-            ending: "💀 爆肝地獄犧牲者",
-            illustration: "🕯️",
-            description: "你的對策因流於空泛，未能打動總經理蘇恬，也被夏凌步步進逼。在無效掙扎數週後，你被逼迫加入無止盡的爆肝加班，成為了黑心萬鈞公司業務部最悲慘的基層齒輪。"
-        }
+        char1_reply: char1,
+        char2_reply: char2,
+        trigger_transition: hasImprovementPlan // 只要有改善計畫就觸發轉場[cite: 2]
     };
 }
-
 
 // ==========================================================================
 // 7. 結局展示與重置
@@ -790,5 +1019,8 @@ restartBtn.addEventListener("click", () => {
     pageGame.classList.remove("active");
     pageStory.classList.remove("active");
     pageChat.classList.remove("active");
+    pageTransition.classList.remove("active");
+    pageChapter2Start.classList.remove("active");
+    pageChapter2Chat.classList.remove("active");
     pageStart.classList.add("active");
 });
