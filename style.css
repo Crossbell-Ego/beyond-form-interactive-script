@@ -1,0 +1,1244 @@
+/* ==========================================================================
+   拯救爆肝地獄！新人的部門改造計畫 - 核心樣式表
+   ========================================================================== */
+
+/* 變數定義：建立專案的核心色彩系統 */
+:root {
+    --bg-dark: #070913;
+    --bg-card: rgba(15, 20, 35, 0.65);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --text-light: #f3f4f6;
+    --text-muted: #9ca3af;
+    
+    /* 角色主題色 */
+    --color-hr: #ff3b6c;       /* 夏凌的冷酷紅 */
+    --color-gm: #00f0ff;       /* 蘇恬的改革青 */
+    --color-primary: #8b5cf6;  /* 系統主色調紫 */
+    --color-accent: #f59e0b;   /* 橙色警告 */
+
+    /* 漸層色 */
+    --grad-title: linear-gradient(135deg, #00f0ff 0%, #8b5cf6 50%, #ff3b6c 100%);
+    --grad-button: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    --grad-hr: linear-gradient(135deg, #ff3b6c 0%, #991b1b 100%);
+    --grad-gm: linear-gradient(135deg, #00f0ff 0%, #0369a1 100%);
+}
+
+/* 全域重設 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    overflow: hidden;
+    user-select: none; /* 防止遊戲中因頻繁點擊而選取文字 */
+}
+
+/* 遊戲主容器 */
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 1920px;
+    max-height: 1080px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* 頁面切換控制 */
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s;
+    z-index: 1;
+}
+
+.page.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 10;
+}
+
+/* Glassmorphism 磨砂玻璃通用樣式 */
+.glass {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* 通用按鈕 */
+.btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn.primary {
+    background: var(--grad-button);
+    color: white;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+}
+
+.btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+}
+
+.btn.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.btn.large {
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+}
+
+/* ==========================================================================
+   分頁一：準備畫面
+   ========================================================================== */
+#page-start {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(7, 9, 19, 0.55) 0%, rgba(7, 9, 19, 0.85) 100%), url('images/背景圖.png');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+}
+
+.start-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 0),
+        radial-gradient(rgba(255, 59, 108, 0.05) 1px, transparent 0);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    opacity: 0.6;
+    animation: bgPan 20s linear infinite;
+}
+
+.start-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logo-badge {
+    display: block;
+    font-size: 5rem;
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: #ffffff;
+    text-shadow: 
+        -2px -2px 0 #000, 
+         2px -2px 0 #000, 
+        -2px  2px 0 #000, 
+         2px  2px 0 #000,
+         0px -2px 0 #000,
+         0px  2px 0 #000,
+        -2px  0px 0 #000,
+         2px  0px 0 #000,
+         0px  8px 16px rgba(0, 0, 0, 0.9);
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    line-height: 1.3;
+}
+
+.logo-badge .en-sub {
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 10px;
+    color: #ffffff;
+    display: block;
+    margin-top: 5px;
+}
+
+.start-subtitle {
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: #ffffff;
+    text-shadow: 
+        -1.5px -1.5px 0 #000, 
+         1.5px -1.5px 0 #000, 
+        -1.5px  1.5px 0 #000, 
+         1.5px  1.5px 0 #000,
+         0px  4px 8px rgba(0, 0, 0, 0.9);
+    margin-bottom: 50px;
+    line-height: 1.5;
+}
+
+.main-title {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.title-sub {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 4px;
+}
+
+.title-main {
+    font-size: 3.8rem;
+    font-weight: 900;
+    background: var(--grad-title);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.description {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+}
+
+.start-prompt {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    font-weight: 500;
+}
+
+.pulse-text {
+    animation: pulse 1.8s infinite;
+}
+
+/* ==========================================================================
+   分頁三：故事背景頁
+   ========================================================================== */
+#page-story {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.story-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/背景圖.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.story-wrapper {
+    position: relative;
+    z-index: 4;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-container {
+    padding: 40px;
+    border-radius: 16px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.story-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    border-left: 4px solid var(--color-gm);
+    padding-left: 15px;
+    line-height: 1.4;
+}
+
+.story-quote {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-hr);
+    background: rgba(255, 59, 108, 0.08);
+    border: 1px solid rgba(255, 59, 108, 0.15);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    letter-spacing: 1px;
+}
+
+.story-body {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-light);
+    margin-bottom: 30px;
+}
+
+.story-body p {
+    margin-bottom: 16px;
+    text-align: justify;
+}
+
+.story-body p:last-child {
+    margin-bottom: 0;
+}
+
+.story-click-prompt {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.9rem;
+    color: var(--color-gm);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   分頁二：遊戲對話頁
+   ========================================================================== */
+#page-game {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.game-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/背景圖.png');
+    background-size: cover;
+    background-position: center;
+    transition: filter 1s ease, transform 1s ease;
+    z-index: 1;
+}
+
+.game-bg-dim {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(7, 9, 19, 0.4) 0%, rgba(7, 9, 19, 0.85) 100%);
+    z-index: 2;
+}
+/* 角色立繪顯示區 (開場置中) */
+.character-container {
+    position: absolute;
+    bottom: 220px; /* 留出底部對話框的空間 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px;
+    height: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.character-sprite {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.character-sprite.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: float 6s ease-in-out infinite alternate;
+}
+
+/* 角色立繪顯示區（左右分立） */
+.characters-split-container {
+    position: absolute;
+    bottom: 150px; /* 留出底部對話框與輸入框的高度 */
+    left: 0;
+    width: 100%;
+    height: 75%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 10px; /* 貼緊螢幕左右兩端 */
+    z-index: 5;
+    pointer-events: none; /* 點擊事件穿透 */
+}
+
+.char-wrapper {
+    height: 85%;
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    opacity: 1; /* 圖片不透明化 */
+    filter: brightness(45%); /* 採用亮度控制亮暗對比 */
+    transform: scale(0.96);
+}
+
+/* 正在發言的角色亮起與發光 */
+.char-wrapper.active-speaker {
+    opacity: 1;
+    filter: brightness(100%);
+    transform: scale(1.04);
+}
+
+.char-left.active-speaker {
+    filter: drop-shadow(0 0 25px rgba(255, 59, 108, 0.35));
+}
+
+.char-right.active-speaker {
+    filter: drop-shadow(0 0 25px rgba(0, 240, 255, 0.35));
+}
+
+.char-sprite-split {
+    max-height: 90%;
+    max-width: 100%;
+    object-fit: contain;
+    animation: float 6s ease-in-out infinite alternate;
+}
+
+.char-name-tag {
+    padding: 5px 16px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 1px;
+}
+
+.tag-hr {
+    background: var(--grad-hr);
+}
+
+.tag-gm {
+    background: var(--grad-gm);
+}
+
+/* 遊戲 UI 層 */
+.game-ui {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px;
+    z-index: 4;
+}
+
+/* 聊天 UI 層 */
+.chat-ui {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px;
+    z-index: 8;
+}
+
+.chat-input-area-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto 10px auto;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+/* 聊天輸入欄（膠囊造型） */
+.chat-input-bar {
+    display: flex;
+    align-items: center;
+    background: rgba(20, 22, 33, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px;
+    padding: 6px 6px 6px 20px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.chat-input-bar:focus-within {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.25), 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+#chat-player-response {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.98rem;
+    padding: 8px 0;
+    height: 38px;
+}
+
+#chat-player-response::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* 發送按鈕 */
+.chat-send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--grad-button);
+    border: none;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+}
+
+.chat-send-btn:hover {
+    transform: scale(1.08) rotate(-5deg);
+    box-shadow: 0 6px 15px rgba(139, 92, 246, 0.5);
+}
+
+.chat-send-btn svg {
+    width: 18px;
+    height: 18px;
+    transform: rotate(45deg) translate(-1px, 1px); /* 指向右上方 */
+}
+
+/* AI 載入狀態條 */
+.chat-ai-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    height: 50px;
+    background: rgba(20, 22, 33, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px;
+    padding: 0 20px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    animation: fadeIn 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.loader-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.loader-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-gm);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: loaderDotsBlink 1.4s infinite both;
+}
+
+.loader-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loader-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes loaderDotsBlink {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+.loader-text-small {
+    font-size: 0.95rem;
+    color: var(--color-gm);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* 滾動對話歷史紀錄區 */
+.chat-history-container {
+    flex: 1 1 0%;
+    width: 100%;
+    max-width: 750px;
+    margin: 15px auto;
+    padding: 10px 5px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* 對話泡泡樣式 */
+.chat-bubble {
+    max-width: 80%;
+    padding: 14px 18px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text-light);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    word-break: break-all;
+}
+
+/* 夏凌對話氣泡：靠左對齊，深色底，紅細邊 */
+.hr-bubble {
+    align-self: flex-start;
+    background: rgba(22, 24, 38, 0.85);
+    border: 1px solid rgba(255, 59, 108, 0.2);
+    border-radius: 20px 20px 20px 4px;
+}
+
+.hr-bubble strong {
+    display: inline-block;
+    color: var(--color-hr);
+    background: rgba(255, 59, 108, 0.12);
+    border: 1px solid var(--color-hr);
+    font-size: 0.9rem;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* 蘇恬對話氣泡：靠右對齊，深色底，青細邊 */
+.gm-bubble {
+    align-self: flex-end;
+    background: rgba(22, 24, 38, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 20px 20px 4px 20px;
+}
+
+.gm-bubble strong {
+    display: inline-block;
+    color: var(--color-gm);
+    background: rgba(0, 240, 255, 0.12);
+    border: 1px solid var(--color-gm);
+    font-size: 0.9rem;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* 玩家對話氣泡：置中寬框，純紫色，無名字 */
+.player-bubble {
+    align-self: center;
+    width: 96%;
+    max-width: 100%;
+    background: #6d28d9;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border: none;
+    border-radius: 16px;
+    color: #ffffff;
+    box-sizing: border-box;
+}
+
+.player-bubble strong {
+    display: none; /* 隱藏「你：」 */
+}
+
+/* 打字狀態小圓點 */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 4px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background-color: currentColor;
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: typingBlink 1.4s infinite both;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingBlink {
+    0% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+}
+
+/* 美化滾動條 */
+.chat-history-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-history-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.chat-history-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.chat-history-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* 頂部控制列 */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.chapter-tag {
+    background: rgba(139, 92, 246, 0.25);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #c084fc;
+}
+
+.game-status {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.game-status strong {
+    color: var(--text-light);
+    margin-left: 5px;
+}
+
+/* 底部對話框與輸入區包裝 */
+.dialogue-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-radius: 16px;
+    padding: 30px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    pointer-events: auto; /* 允許與對話框內部組件互動 */
+}
+
+/* 名字欄 */
+.name-box-container {
+    position: absolute;
+    top: -20px;
+    left: 40px;
+}
+
+.name-box {
+    padding: 6px 24px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: white;
+    border-radius: 6px;
+    transform: skewX(-10deg);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: background 0.5s ease;
+}
+
+.name-box.role-hr {
+    background: var(--grad-hr);
+    border-left: 4px solid #fff;
+}
+
+.name-box.role-gm {
+    background: var(--grad-gm);
+    border-left: 4px solid #fff;
+}
+
+/* 對話文字 */
+.dialogue-content {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    min-height: 54px;
+}
+
+/* 點擊提示 */
+.click-prompt {
+    align-self: flex-end;
+    font-size: 0.85rem;
+    color: var(--color-gm);
+    opacity: 0.8;
+    animation: blink 1.2s infinite alternate;
+}
+
+.click-prompt.hidden {
+    display: none;
+}
+
+/* ==========================================================================
+   玩家互動決策區
+   ========================================================================== */
+.input-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    animation: slideUpFade 0.5s ease-out;
+}
+
+.input-container.hidden {
+    display: none;
+}
+
+.input-instruction {
+    font-size: 0.95rem;
+    color: var(--color-gm);
+    font-weight: 600;
+}
+
+/* 快捷按鈕區 */
+.quick-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quick-opt-btn {
+    text-align: left;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-opt-btn:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.4);
+    transform: translateX(4px);
+    color: white;
+}
+
+/* 自訂輸入列 */
+.custom-input-group {
+    display: flex;
+    gap: 12px;
+}
+
+#player-response {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#player-response:focus {
+    border-color: var(--color-primary);
+}
+
+/* AI 評估載入動畫 */
+.ai-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    gap: 15px;
+    animation: fadeIn 0.3s ease;
+}
+
+.ai-loading-container.hidden {
+    display: none;
+}
+
+.loader-radar {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 240, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--color-gm);
+    animation: spin 1s linear infinite;
+    position: relative;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.loader-text {
+    font-size: 0.95rem;
+    color: var(--color-gm);
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   API 設定彈跳視窗
+   ========================================================================== */
+#api-settings-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(15, 20, 35, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    pointer-events: auto;
+}
+
+#api-settings-btn:hover {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(15, 20, 35, 0.95);
+    transform: scale(1.05);
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 450px;
+    padding: 30px;
+    border-radius: 12px;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: white;
+}
+
+.modal h3 {
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: white;
+}
+
+.modal p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.input-group input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: var(--color-primary);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.env-badge {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+}
+
+.env-badge.hidden {
+    display: none;
+}
+
+/* ==========================================================================
+   結局展示窗
+   ========================================================================== */
+.ending-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 6, 14, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.ending-screen.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ending-card {
+    width: 90%;
+    max-width: 500px;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: zoomIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ending-badge {
+    padding: 4px 14px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+#ending-title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ending-illustration {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4.5rem;
+}
+
+#ending-description {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 35px;
+}
+
+/* ==========================================================================
+   動畫效果集錦
+   ========================================================================== */
+
+/* 角色漂浮 (浮動) 效果 */
+@keyframes float {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-12px) scale(1.01); }
+}
+
+/* 呼吸脈衝 */
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.03); }
+}
+
+/* 點擊提示呼吸 */
+@keyframes blink {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* 背景格線滾動 */
+@keyframes bgPan {
+    from { background-position: 0 0, 20px 20px; }
+    to { background-position: 1000px 1000px, 1020px 1020px; }
+}
+
+/* 淡入與滑出 */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); }
+    to { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 雷達/載入圈旋轉 */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

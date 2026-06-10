@@ -1,0 +1,29 @@
+# 敏感金鑰與環境變數（防止 API Key 外洩）
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 編輯器與 IDE 設定檔
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 作業系統暫存檔與日誌
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node 依賴目錄（保留未來擴充彈性）
+node_modules/
+dist/
+build/

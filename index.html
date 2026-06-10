@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拯救爆肝地獄！新人的部門改造計畫 - 《化形之後》MVP</title>
+    <!-- 引入 Google Fonts 提升質感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- API 設定按鈕 -->
+        <button id="api-settings-btn" title="設定 API Key">⚙️ AI 設定</button>
+
+        <!-- API 設定 Modal -->
+        <div id="api-modal" class="modal">
+            <div class="modal-content glass">
+                <span class="close-btn">&times;</span>
+                <h3>🤖 AI 驅動設定 (選填)</h3>
+                <p>若想體驗真實 LangChain/AI 互動，請填寫 Gemini API Key。若留空，遊戲將使用內建智慧模擬對答。</p>
+                <div id="env-status-badge" class="env-badge hidden">📄 已成功自動載入 .env 設定</div>
+                <div class="input-group">
+                    <label for="api-key">Gemini API Key:</label>
+                    <input type="password" id="api-key" placeholder="AIzaSy...">
+                </div>
+                <div class="input-group">
+                    <label for="api-model">Gemini Model:</label>
+                    <input type="text" id="api-model" placeholder="gemini-3.1-lite" value="gemini-3.1-lite">
+                </div>
+                <div class="modal-actions">
+                    <button id="save-api-btn" class="btn primary">儲存設定</button>
+                    <button id="clear-api-btn" class="btn secondary">清除</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁一：準備畫面 ==================== -->
+        <div id="page-start" class="page active">
+            <div class="start-bg-overlay"></div>
+            <div class="start-content">
+                <div class="logo-badge">化形之外<br><span class="en-sub">BEYOND FORM</span></div>
+                <div class="start-subtitle">世界將重新命名當記錄者被記錄之日</div>
+                <div class="start-prompt">
+                    <span class="pulse-text">🖱️ 點選網頁左鍵繼續</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁三：故事背景頁 ==================== -->
+        <div id="page-story" class="page">
+            <!-- 遊戲背景，預設由 CSS 設為 images/背景圖.png -->
+            <div class="story-background"></div>
+            <div class="game-bg-dim"></div>
+            <div class="story-wrapper">
+                <div class="story-container glass">
+                    <h2 class="story-title">歡迎來到萬鈞股份有限公司——業務部</h2>
+                    <div class="story-quote">「在這裡，準時下班是一種罪過，瘋狂內鬥是唯一的生存法則。」</div>
+                    <div class="story-body">
+                        <p>你是一位剛通過激烈面試、滿懷熱血入職的職場新鮮人。</p>
+                        <p>但在你踏進業務部辦公室的第一天，眼前的景象卻讓你倒吸一口涼氣：堆積如山的公文、同事們佈滿血絲的雙眼，以及鍵盤被瘋狂敲擊的啪啪聲。</p>
+                        <p>這個部門正陷入一場病態的「爆肝地獄」文化——主管為了壓榨產值不擇手段，同事之間為了搶客戶、奪資源而天天明爭暗鬥、互相甩鍋。無止境的加班和惡性競爭，讓整個部門的流動率高得嚇人，團隊隨時處於崩潰邊緣。
+                        </p>
+                        <p>身為新人的你，立刻面臨了最殘酷的職場危機：如果不能在實習期內想辦法生存下來並改造這個有毒的部門文化，你將會成為下一個被犧牲的祭品。</p>
+                        <p>深吸一口氣，你推開了總經理辦公室的大門，迎接你的，是掌握你生殺大權的兩位高層……</p>
+                    </div>
+                    <div class="story-click-prompt">
+                        <span class="pulse-text">🖱️ 點選網頁左鍵繼續</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁二：遊戲對話頁 (開場對話) ==================== -->
+        <div id="page-game" class="page">
+            <!-- 遊戲背景，預設由 CSS 設為 images/背景圖.png -->
+            <div class="game-background"></div>
+            <div class="game-bg-dim"></div>
+
+            <!-- 角色立繪顯示區 (開場置中) -->
+            <div class="character-container">
+                <img id="char-img" src="" alt="角色立繪" class="character-sprite">
+            </div>
+
+            <!-- 遊戲主要 UI 介面層 -->
+            <div class="game-ui">
+                <!-- 頂部提示/章節 -->
+                <div class="top-bar">
+                    <div class="chapter-tag">第一幕：裁員風暴</div>
+                    <div class="game-status">
+                        <span>目前狀態：<strong id="status-text">對話初始化</strong></span>
+                    </div>
+                </div>
+
+                <!-- 底部對話區 -->
+                <div class="dialogue-wrapper glass">
+                    <!-- 角色名稱標籤 -->
+                    <div class="name-box-container">
+                        <div id="name-box" class="name-box">夏凌</div>
+                    </div>
+
+                    <!-- 對話內容區 -->
+                    <div class="dialogue-content">
+                        <p id="dialogue-text">正在初始化對話...</p>
+                    </div>
+
+                    <!-- 點擊繼續提示 -->
+                    <div id="click-prompt" class="click-prompt">
+                        <span>點擊任意處繼續 ➔</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁四：循環對話頁 ==================== -->
+        <div id="page-chat" class="page">
+            <div class="game-background"></div>
+            <div class="game-bg-dim"></div>
+
+            <!-- 左右角色立繪 -->
+            <div class="characters-split-container">
+                <div class="char-wrapper char-left" id="chat-wrapper-hr">
+                    <img src="images/角色一_分頁四.png" alt="夏凌" class="char-sprite-split">
+                    <div class="char-name-tag tag-hr">夏凌 (HR稽核)</div>
+                </div>
+                <div class="char-wrapper char-right" id="chat-wrapper-gm">
+                    <img src="images/角色二 _分頁四.png" alt="蘇恬" class="char-sprite-split">
+                    <div class="char-name-tag tag-gm">蘇恬 (總經理)</div>
+                </div>
+            </div>
+
+            <!-- 聊天與輸入 UI -->
+            <div class="chat-ui">
+                <!-- 頂部提示 -->
+                <div class="top-bar">
+                    <div class="chapter-tag">第一幕：裁員風暴 (對峙中)</div>
+                    <div class="game-status">
+                        <span>目前狀態：<strong id="chat-status-text">請輸入你的回應對策</strong></span>
+                    </div>
+                </div>
+
+                <!-- 滾動對話歷史紀錄區 -->
+                <div id="chat-history" class="chat-history-container glass">
+                    <!-- 對話歷程將動態生成於此 -->
+                </div>
+
+                <!-- 底部聊天輸入欄與載入動畫 -->
+                <div class="chat-input-area-wrapper">
+                    <!-- 玩家輸入區 (平時顯示，AI 回覆時隱藏) -->
+                    <div id="chat-input-container" class="chat-input-bar">
+                        <input type="text" id="chat-player-response" placeholder="輸入你想對總經理蘇恬說的話..." autocomplete="off">
+                        <button id="chat-submit-response-btn" class="chat-send-btn" title="送出策略">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- AI 載入動畫 -->
+                    <div id="chat-ai-loading" class="chat-ai-status-bar hidden">
+                        <div class="loader-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <p class="loader-text-small">AI Agent 正在分析你的職場策略...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 結局彈出視窗 ==================== -->
+        <div id="ending-screen" class="ending-screen hidden">
+            <div class="ending-card glass">
+                <div class="ending-badge">遊戲結局</div>
+                <h2 id="ending-title">結局名稱</h2>
+                <div id="ending-illustration" class="ending-illustration">
+                    <!-- 動態載入代表結局的 icon/效果 -->
+                    <div class="sparkles"></div>
+                </div>
+                <p id="ending-description">結局詳細說明描述...</p>
+                <button id="restart-btn" class="btn primary large">重新挑戰 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
