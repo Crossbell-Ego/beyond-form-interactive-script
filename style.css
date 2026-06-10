@@ -1726,3 +1726,17 @@ html {
     color: var(--text-muted);
     line-height: 1.5;
 }
+
+/* 說話時的立繪發光特效（保留原有浮動，僅加入發光） */
+.talking {
+    animation: float 6s ease-in-out infinite alternate, talkingGlow 1.2s infinite alternate ease-in-out !important;
+}
+
+@keyframes talkingGlow {
+    0% {
+        filter: brightness(100%) drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
+    }
+    100% {
+        filter: brightness(115%) drop-shadow(0 0 25px rgba(255, 255, 255, 0.45));
+    }
+}

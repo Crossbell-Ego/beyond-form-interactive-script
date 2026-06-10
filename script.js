@@ -14,7 +14,7 @@ const dialogueData = [
         role: "蘇恬",
         image: "images/角色二.png",
         styleClass: "role-gm",
-        text: "夏凌，你那套冰冷的 KPI 數據該適可而止了。如果一個部門只剩下瘋狂加班 and 內鬥，那公司離倒閉也不遠了。這位新人，我想聽聽你的想法，你打算怎麼解決你目前的處境？"
+        text: "夏凌，你那套冰冷的 KPI 數據該適可而止了。如果一個部門只剩下瘋狂加班跟內鬥，那公司離倒閉也不遠了。這位新人，我想聽聽你的想法，你打算怎麼解決你目前的處境？"
     }
 ];
 
@@ -24,6 +24,49 @@ let dialogueIndex = 0;
 let isTyping = false;
 let typeInterval = null;
 let currentTextToShow = "";
+
+// 語音播放變數與輔助函數
+let currentVoiceAudio = null;
+let currentTalkingElement = null;
+
+function stopVoice() {
+    if (currentVoiceAudio) {
+        currentVoiceAudio.pause();
+        currentVoiceAudio.currentTime = 0;
+        currentVoiceAudio = null;
+    }
+    if (currentTalkingElement) {
+        currentTalkingElement.classList.remove("talking");
+        currentTalkingElement = null;
+    }
+}
+
+function playVoice(voicePath, element = null, rate = 1.25) {
+    stopVoice();
+
+    currentTalkingElement = element;
+    currentVoiceAudio = new Audio(voicePath);
+    currentVoiceAudio.playbackRate = rate; // 設定播放倍速
+
+    if (currentTalkingElement) {
+        currentTalkingElement.classList.add("talking");
+    }
+
+    currentVoiceAudio.onended = () => {
+        if (currentTalkingElement) {
+            currentTalkingElement.classList.remove("talking");
+            currentTalkingElement = null;
+        }
+    };
+
+    currentVoiceAudio.play().catch(err => {
+        console.log("語音播放受瀏覽器自動播放政策限制，需使用者互動後始能播放。", err);
+        if (currentTalkingElement) {
+            currentTalkingElement.classList.remove("talking");
+            currentTalkingElement = null;
+        }
+    });
+}
 
 // 多 Agent 對話變數
 let chatHistoryData = [];      // 儲存對話上下文 [{role: "夏凌", text: "..."}, ...]
@@ -515,6 +558,7 @@ function showStoryPage() {
     currentPageState = "story";
     pageStart.classList.remove("active");
     pageStory.classList.add("active");
+    playVoice("voice/開場白一.mp3", null, 1.5);
 }
 
 // 進入開場對話頁 (分頁二)
@@ -558,6 +602,13 @@ function advanceDialogue() {
             charImg.classList.add("show");
         }, 150);
 
+        // 播放角色語音，並傳入立繪元素以顯示說話動畫
+        if (currentData.role === "夏凌") {
+            playVoice("voice/角色一.mp3", charImg);
+        } else if (currentData.role === "蘇恬") {
+            playVoice("voice/角色二.mp3", charImg);
+        }
+
         startTypewriter(currentData.text);
 
         dialogueIndex++;
@@ -566,6 +617,7 @@ function advanceDialogue() {
 
 // 切換至對話循環頁面 (分頁四)
 function switchToChatPage() {
+    stopVoice();
     currentPageState = "chat";
     pageGame.classList.remove("active");
     pageChat.classList.add("active");
@@ -595,10 +647,13 @@ function switchToTransitionPage() {
         p.offsetHeight; // 觸發 reflow
         p.style.animation = null;
     });
+
+    playVoice("voice/開場白二.mp3", null, 1.5);
 }
 
 // 切換至第二章開場對話頁 (分頁六)
 function switchToChapter2() {
+    stopVoice();
     currentPageState = "chapter2_start";
     pageTransition.classList.remove("active");
     pageChapter2Start.classList.add("active");
@@ -610,6 +665,7 @@ function switchToChapter2() {
     setTimeout(() => {
         charImgC2.classList.add("show");
         const chapter2IntroText = "嘿！你就是總經理親點調來的新人吧？聽說你在業務部搞了個大動作，有衝勁！  實話告訴你，我們接下來要推動『跨國智慧管理系統』，只要成功，就能徹底掀翻公司爆肝加班的爛制度！  但現在夏凌正盯著我們的預算，我們第一步必須在不被他抓到把柄的情況下，拿到海外分公司的測試數據。挑戰來了，你有膽量跟我一起幹這條大的嗎？你打算用什麼策略幫專案跨出這第一步？說聽聽你的計畫！";
+        playVoice("voice/角色三.mp3", charImgC2);
         startTypewriter(chapter2IntroText);
     }, 150);
 }
@@ -720,6 +776,7 @@ function submitPlayerDecision(inputText) {
 
 // 切換至第二章對答頁 (分頁七)
 function switchToChapter2Chat() {
+    stopVoice();
     currentPageState = "chapter2_chat";
     pageChapter2Start.classList.remove("active");
     pageChapter2Chat.classList.add("active");
@@ -1036,6 +1093,7 @@ function showEndingCard(endingData) {
 
 // 重新開始遊戲
 restartBtn.addEventListener("click", () => {
+    stopVoice();
     endingScreen.classList.remove("show");
     setTimeout(() => {
         endingScreen.classList.add("hidden");
